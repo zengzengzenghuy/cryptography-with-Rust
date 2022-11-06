@@ -29,7 +29,7 @@ For more information, check out [Rust book](https://doc.rust-lang.org/book/).
 
 # Future Plan
 
--[x] Testing with different Elliptic Curve.
+- [x] Testing with different Elliptic Curve.
 [] Write proof using other arkworks package.
 [] Build front end for user to interact with, customize input and parameters from front end
 [] Create real world application

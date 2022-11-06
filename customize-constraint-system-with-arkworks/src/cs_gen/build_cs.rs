@@ -1,4 +1,7 @@
-use std::ops::{MulAssign, SubAssign};
+use std::{
+    fs::File,
+    ops::{MulAssign, SubAssign},
+};
 
 use ark_ec::PairingEngine;
 use ark_ff::{Field, Zero};
@@ -11,21 +14,22 @@ use ark_relations::{
 //use ark_ff::UniformRand;
 use ark_groth16::*;
 use ark_std::{test_rng, UniformRand};
+use serde_json::{from_reader, Value};
 pub struct MemoryCircuit<F: Field> {
-    // ISNOLAST: Option<F>,
-    // address: Option<F>,
-    // step: Option<F>,
+    ISNOLAST: Option<F>,
+    address: Option<F>,
+    step: Option<F>,
     mOp: Option<F>,
     mWr: Option<F>,
-    // lastAccess: usize,
-    // val0: usize,
-    // val1: usize,
-    // val2: usize,
-    // val3: usize,
-    // val4: usize,
-    // val5: usize,
-    // val6: usize,
-    // val7: usize,
+    lastAccess: Option<F>,
+    val0: Option<F>,
+    val1: Option<F>,
+    val2: Option<F>,
+    val3: Option<F>,
+    val4: Option<F>,
+    val5: Option<F>,
+    val6: Option<F>,
+    val7: Option<F>,
 }
 
 impl<ConstraintF: Field> ConstraintSynthesizer<ConstraintF> for MemoryCircuit<ConstraintF> {
@@ -60,12 +64,24 @@ impl<ConstraintF: Field> ConstraintSynthesizer<ConstraintF> for MemoryCircuit<Co
     }
 }
 
-pub fn prove_and_verify<E: PairingEngine>(n_iters: usize) {
+pub fn random_prove_and_verify<E: PairingEngine>(n_iters: usize) {
     let rng = &mut test_rng();
     let parameters: ProvingKey<E> = generate_random_parameters::<E, _, _>(
         MemoryCircuit {
+            ISNOLAST: None,
+            address: None,
+            step: None,
             mOp: None,
             mWr: None,
+            lastAccess: None,
+            val0: None,
+            val1: None,
+            val2: None,
+            val3: None,
+            val4: None,
+            val5: None,
+            val6: None,
+            val7: None,
         },
         rng,
     )
@@ -85,8 +101,86 @@ pub fn prove_and_verify<E: PairingEngine>(n_iters: usize) {
 
         let proof = create_random_proof(
             MemoryCircuit {
+                ISNOLAST: None,
+                address: None,
+                step: None,
                 mOp: Some(mOp),
                 mWr: Some(mWr),
+                lastAccess: None,
+                val0: None,
+                val1: None,
+                val2: None,
+                val3: None,
+                val4: None,
+                val5: None,
+                val6: None,
+                val7: None,
+            },
+            &parameters,
+            rng,
+        )
+        .unwrap();
+        let verify_proof_result: R1CSResult<bool> = verify_proof(&pvk, &proof, &[out]);
+        println!("{:#?}", verify_proof_result.unwrap());
+        assert!(!verify_proof(&pvk, &proof, &[mOp]).unwrap());
+    }
+}
+
+pub fn prove_and_verify<E: PairingEngine>() {
+    let data_file = File::open("./src/data/memory-table.json").unwrap();
+    let json: serde_json::Value =
+        serde_json::from_reader(data_file).expect("file should be proper JSON");
+    let data = json.get("data").expect("file should have data key");
+    let rng = &mut test_rng();
+    let parameters: ProvingKey<E> = generate_random_parameters::<E, _, _>(
+        MemoryCircuit {
+            ISNOLAST: None,
+            address: None,
+            step: None,
+            mOp: None,
+            mWr: None,
+            lastAccess: None,
+            val0: None,
+            val1: None,
+            val2: None,
+            val3: None,
+            val4: None,
+            val5: None,
+            val6: None,
+            val7: None,
+        },
+        rng,
+    )
+    .unwrap();
+
+    let pvk = prepare_verifying_key::<E>(&parameters.vk);
+    let array_len = data.as_array().unwrap().len();
+    for i in 0..array_len {
+        println!("Iteration {:#?}", i);
+        let mOp = E::Fr::from(data.as_array().unwrap()[i]["mOp"].as_u64().unwrap());
+        let mWr = E::Fr::from(data.as_array().unwrap()[i]["mWr"].as_u64().unwrap());
+
+        let one = E::Fr::from(1u64);
+
+        let mut out = one - mOp;
+        out.mul_assign(&mWr);
+
+        let proof = create_random_proof(
+            MemoryCircuit {
+                ISNOLAST: None,
+                address: None,
+                step: None,
+                mOp: Some(mOp),
+                mWr: Some(mWr),
+                lastAccess: None,
+                val0: None,
+                val1: None,
+                val2: None,
+                val3: None,
+                val4: None,
+                val5: None,
+                val6: None,
+                val7: None,
             },
             &parameters,
             rng,

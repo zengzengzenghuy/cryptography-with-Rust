@@ -3,4 +3,4 @@ This is a repo for documenting my journey of learning cryptography and Rust sinc
 
 ## Roadmap
 - [x] Customize Constraint System with Arkworks   
-[ ] Customize Proof Generation
+

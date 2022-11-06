@@ -11,7 +11,7 @@ use ark_relations::{
 //use ark_ff::UniformRand;
 use ark_groth16::*;
 use ark_std::{test_rng, UniformRand};
-struct MemoryCircuit<F: Field> {
+pub struct MemoryCircuit<F: Field> {
     // ISNOLAST: Option<F>,
     // address: Option<F>,
     // step: Option<F>,
@@ -60,7 +60,7 @@ impl<ConstraintF: Field> ConstraintSynthesizer<ConstraintF> for MemoryCircuit<Co
     }
 }
 
-fn prove_and_verify<E: PairingEngine>(n_iters: usize) {
+pub fn prove_and_verify<E: PairingEngine>(n_iters: usize) {
     let rng = &mut test_rng();
     let parameters: ProvingKey<E> = generate_random_parameters::<E, _, _>(
         MemoryCircuit {
@@ -73,7 +73,8 @@ fn prove_and_verify<E: PairingEngine>(n_iters: usize) {
 
     let pvk = prepare_verifying_key::<E>(&parameters.vk);
 
-    for _ in 0..n_iters {
+    for i in 0..n_iters {
+        println!("Iteration {:#?}", i);
         let mOp = E::Fr::rand(rng);
         let mWr = E::Fr::rand(rng);
 
@@ -92,7 +93,7 @@ fn prove_and_verify<E: PairingEngine>(n_iters: usize) {
         )
         .unwrap();
         let verify_proof_result: R1CSResult<bool> = verify_proof(&pvk, &proof, &[out]);
-        println!("{:#?}", verify_proof_result);
+        println!("{:#?}", verify_proof_result.unwrap());
         assert!(!verify_proof(&pvk, &proof, &[mOp]).unwrap());
     }
 }

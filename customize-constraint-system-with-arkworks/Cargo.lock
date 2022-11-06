@@ -14,6 +14,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "ark-bls12-377"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc41c02c0d18a226947ee9ee023b1d957bdb6a68fc22ac296722935a9fef423c"
+dependencies = [
+ "ark-ec",
+ "ark-ff",
+ "ark-std",
+]
+
+[[package]]
+name = "ark-cp6-782"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb8b94a4e6f8912729377e6cbc67bee76315a3a696605f56fb4ace0a6479481d"
+dependencies = [
+ "ark-bls12-377",
+ "ark-ec",
+ "ark-ff",
+ "ark-std",
+]
+
+[[package]]
 name = "ark-crypto-primitives"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -253,6 +276,8 @@ dependencies = [
 name = "customize-constraint-system-with-arkwork"
 version = "0.1.0"
 dependencies = [
+ "ark-bls12-377",
+ "ark-cp6-782",
  "ark-ec",
  "ark-ff",
  "ark-groth16",
